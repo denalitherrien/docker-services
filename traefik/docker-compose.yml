@@ -1,0 +1,43 @@
+services:
+  traefik:
+    image: traefik:latest
+    env_file:
+      - "./.env"
+    container_name: traefik
+    restart: always
+    command: 
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.http.tls=true"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.${CERT_RESOLVER}.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.${CERT_RESOLVER}.acme.email=${CERT_RESOLVER_EMAIL_ADDRESS}"
+      - "--certificatesresolvers.${CERT_RESOLVER}.acme.storage=/letsencrypt/acme.json"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${VAR_RUN_DIR}/docker.sock:/var/run/docker.sock:ro
+      - ${SRV_DIR}/traefik/letsencrypt:/letsencrypt
+    networks:
+      - proxy
+      - media
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=${CERT_RESOLVER}"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+networks:
+  proxy:
+    external: true
+  media:
+    external: true
+  matrix_net:
+    external: true

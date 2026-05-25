@@ -1,0 +1,15 @@
+services:
+  lidarr:
+    container_name: lidarr
+    image: ghcr.io/hotio/lidarr
+    ports:
+      - "8686:8686"
+    environment:
+      - PUID=${LIDARR_UID}
+      - PGID=${LIDARR_GID}
+      - UMASK=002
+      - TZ=${TZ}
+      - WEBUI_PORTS=8686/tcp 
+    volumes:
+      - ${SRV_DIR}/lidarr:/config
+      - ${LIBRARY_DIR}/music:/data

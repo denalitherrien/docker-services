@@ -1,0 +1,33 @@
+services:
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    user: ${NAVIDROME_UID}:${NAVIDROME_GID} # should be owner of volumes
+    ports:
+      - "4533:4533"
+    restart: unless-stopped
+    volumes:
+      - ${SRV_DIR}/navidrome:/data
+      - ${LIBRARY_DIR}/music:/music
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.navidrome.tls=true"
+      - "traefik.http.routers.navidrome.tls.certresolver=${CERT_RESOLVER}"
+      - "traefik.http.routers.navidrome.entrypoints=websecure"
+      - "traefik.http.routers.navidrome.rule=Host(`music.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.navidrome.service=navidrome-svc"
+      - "traefik.http.services.navidrome-svc.loadbalancer.server.port=4533"
+      - "traefik.docker.network=media"
+      - "traefik.docker.network=proxy"
+      # Not sure if I need these 2
+      #- "traefik.http.middlewares.navidrome-ipallow.ipallowlist.sourcerange=192.168.1.0/24, 192.168.4.0/24"
+      #- "traefik.http.routers.navidrome.middlewares=navidrome-ipallow"
+    networks:
+      - proxy
+      - media
+
+networks:
+  proxy:
+    external: true
+  media:
+    external: true

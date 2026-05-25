@@ -1,0 +1,30 @@
+version: "2"
+services:
+  slskd:
+    image: slskd/slskd
+    container_name: slskd
+    ports:
+      - "5030:5030"
+      - "5031:5031"
+      - "50300:50300"
+    volumes:
+      - ${SRV_DIR}/slskd:/app
+      - ${LIBRARY_DIR}/music:/music
+      - ${LIBRARY_DIR}/downloads:/downloads
+      - ${LIBRARY_DIR}/incomplete:/incomplete
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.slskd.tls=true"
+      - "traefik.http.routers.slskd.tls.certresolver=${CERT_RESOLVER}"
+      - "traefik.http.routers.slskd.entrypoints=websecure"
+      - "traefik.http.routers.slskd.rule=Host(`slskd.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.slskd.service=slskd-svc"
+      - "traefik.http.services.slskd-svc.loadbalancer.server.port=5030"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
