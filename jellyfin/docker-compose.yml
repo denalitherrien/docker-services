@@ -12,6 +12,7 @@ services:
       - ${SRV_DIR}/jellyfin/cache:/cache
       - ${LIBRARY_DIR}/video/movies:/mnt/movies
       - ${LIBRARY_DIR}/video/shows:/mnt/shows
+      - ${LIBRARY_DIR}/video/anime:/mnt/anime
       - ${LIBRARY_DIR}/music:/music
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
@@ -74,7 +75,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ${SWARM_SRV_DIR}/jellyswarrm
+      - ${SRV_DIR}/jellyswarrm
     environment:
       - JELLYSWARRM_USERNAME=${JELLYSWARRM_USERNAME}
       - JELLYSWARRM_PASSWORD=${JELLYSWARRM_PASSWORD}
