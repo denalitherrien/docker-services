@@ -13,3 +13,22 @@ services:
     volumes:
       - ${SRV_DIR}/lidarr:/config
       - ${LIBRARY_DIR}/music:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lidarr.tls=true"
+      - "traefik.http.routers.lidarr.tls.certresolver=${CERT_RESOLVER}"
+      - "traefik.http.routers.lidarr.entrypoints=websecure"
+      - "traefik.http.routers.lidarr.rule=Host(`lidarr.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.lidarr.service=lidarr-svc"
+      - "traefik.http.services.lidarr-svc.loadbalancer.server.port=8686"
+      - "traefik.docker.network=media"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+      - media
+
+networks:
+  proxy:
+    external: true
+  media:
+    external: true
