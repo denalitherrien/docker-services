@@ -1,0 +1,37 @@
+services:
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - USER=${TRANSMISSION_USER}
+      - PASS=${TRANSMISSION_PASSWORD}
+    volumes:
+      - ${SRV_DIR}/transmission/data:/config
+      - ${LIBRARY_DIR}/torrents:/downloads #optional
+      - ${LIBRARY_DIR}/watch:/watch #optional
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.transmission.tls=true"
+      - "traefik.http.routers.transmission.tls.certresolver=${CERT_RESOLVER}"
+      - "traefik.http.routers.transmission.entrypoints=websecure"
+      - "traefik.http.routers.transmission.rule=Host(`transmission.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.transmission.service=transmission-svc"
+      - "traefik.http.services.transmission-svc.loadbalancer.server.port=9091"
+      - "traefik.docker.network=proxy"
+    restart: unless-stopped
+    networks:
+      - vpn
+      - proxy
+
+networks:
+  vpn:
+    external: true
+  proxy:
+    external: true

@@ -1,0 +1,33 @@
+version: "2"
+
+services: 
+    surfshark:
+        image: ilteoood/docker-surfshark
+        container_name: surfshark
+        environment: 
+            - SURFSHARK_USER=${SURFSHARK_USER}
+            - SURFSHARK_PASSWORD=${SURFSHARK_PASSWORD}
+              # - SURFSHARK_COUNTRY=${SURFSHARK_COUNTRY}
+              # - SURFSHARK_CITY=${SURFSHARK_CITY}
+            - CONNECTION_TYPE=${SURFSHARK_CONNECTION_TYPE}
+        cap_add: 
+            - NET_ADMIN
+        devices:
+            - /dev/net/tun
+        restart: unless-stopped
+        dns:
+            - 1.1.1.1
+        networks:
+          - vpn
+    service_test:
+        image: byrnedo/alpine-curl
+        container_name: alpine
+        command: -L 'https://ipinfo.io'
+        depends_on: 
+            - surfshark
+        network_mode: service:surfshark
+        restart: always
+
+networks:
+  vpn:
+    external: true
